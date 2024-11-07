@@ -58,9 +58,7 @@ class S3StorageProvider(StorageProvider):
             bucket_name, key = self._bucket_name_and_key(path)
             async with self._get_client() as client:
                 response = await client.get_object(Bucket=bucket_name, Key=key)
-                async for chunk in response["Body"].iter_chunks(
-                    self.STREAMING_CHUNK_SIZE
-                ):
+                async for chunk in response["Body"].iter_chunks():
                     yield chunk
         except Exception as e:
             raise RuntimeError(f"Error downloading file {path} from S3: {e}")

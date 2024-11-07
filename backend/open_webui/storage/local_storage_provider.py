@@ -24,9 +24,10 @@ class LocalStorageProvider(StorageProvider):
         return contents, file_path.as_posix()
 
     async def get_file(self, file_path: str) -> AsyncIterator[bytes]:
+        chunk_size = 8 * 1024
         with open(file_path, "rb") as file:
             while True:
-                chunk = file.read(self.STREAMING_CHUNK_SIZE)
+                chunk = file.read(chunk_size)
                 if not chunk:
                     break
                 yield chunk

@@ -3,18 +3,13 @@ from typing import AsyncIterator, BinaryIO, Tuple, BinaryIO, Tuple, AsyncContext
 
 
 class StorageProvider(ABC):
-    STREAMING_CHUNK_SIZE = 8 * 1024
-
     @abstractmethod
     async def upload_file(self, file: BinaryIO, path: str) -> Tuple[bytes, str]:
         """Uploads a file to the storage and returns the file content bytes and path."""
 
     @abstractmethod
     async def get_file(self, path: str) -> AsyncIterator[bytes]:
-        """
-        Read the contents of a file in the storage.
-        Should use STREAMING_CHUNK_SIZE in its implementation.
-        """
+        """Read the contents of a file in the storage."""
 
     @abstractmethod
     def as_local_file(self, path: str) -> AsyncContextManager[str]:
