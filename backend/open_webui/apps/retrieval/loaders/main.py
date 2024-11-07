@@ -1,3 +1,4 @@
+from typing import Optional
 import requests
 import logging
 import ftfy
@@ -119,7 +120,7 @@ class Loader:
         self.kwargs = kwargs
 
     def load(
-        self, filename: str, file_content_type: str, file_path: str
+        self, filename: str, file_content_type: Optional[str], file_path: str
     ) -> list[Document]:
         loader = self._get_loader(filename, file_content_type, file_path)
         docs = loader.load()
@@ -132,7 +133,9 @@ class Loader:
             for doc in docs
         ]
 
-    def _get_loader(self, filename: str, file_content_type: str, file_path: str):
+    def _get_loader(
+        self, filename: str, file_content_type: Optional[str], file_path: str
+    ):
         file_ext = filename.split(".")[-1].lower()
 
         if self.engine == "tika" and self.kwargs.get("TIKA_SERVER_URL"):
