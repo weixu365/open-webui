@@ -21,7 +21,11 @@ if TYPE_CHECKING:
 
 class S3StorageProvider(StorageProvider):
     def __init__(self):
-        self.session = aioboto3.Session()
+        self.session = aioboto3.Session(
+            region_name=S3_REGION_NAME,
+            aws_access_key_id=S3_ACCESS_KEY_ID,
+            aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+        )
         assert S3_BUCKET_NAME, "S3_BUCKET_NAME must be set if using S3StorageProvider"
         self.bucket_name: str = S3_BUCKET_NAME
         self.bucket_prefix: str = S3_BUCKET_PREFIX or ""
@@ -29,10 +33,7 @@ class S3StorageProvider(StorageProvider):
     def _get_client(self) -> "S3Client":
         return self.session.client(
             "s3",
-            region_name=S3_REGION_NAME,
             endpoint_url=S3_ENDPOINT_URL,
-            aws_access_key_id=S3_ACCESS_KEY_ID,
-            aws_secret_access_key=S3_SECRET_ACCESS_KEY,
         )
 
     async def upload_file(self, file: BinaryIO, filename: str) -> Tuple[bytes, str]:
@@ -88,10 +89,7 @@ class S3StorageProvider(StorageProvider):
         try:
             async with self.session.resource(
                 "s3",
-                region_name=S3_REGION_NAME,
                 endpoint_url=S3_ENDPOINT_URL,
-                aws_access_key_id=S3_ACCESS_KEY_ID,
-                aws_secret_access_key=S3_SECRET_ACCESS_KEY,
             ) as client:
                 bucket = await client.Bucket(self.bucket_name)
                 await bucket.objects.filter(Prefix=self.bucket_prefix).delete()
