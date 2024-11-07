@@ -88,7 +88,13 @@ class S3StorageProvider(StorageProvider):
     async def delete_all_files(self) -> None:
         """Deletes all files from S3."""
         try:
-            async with self.session.resource("s3") as client:
+            async with self.session.resource(
+                "s3",
+                region_name=S3_REGION_NAME,
+                endpoint_url=S3_ENDPOINT_URL,
+                aws_access_key_id=S3_ACCESS_KEY_ID,
+                aws_secret_access_key=S3_SECRET_ACCESS_KEY,
+            ) as client:
                 bucket = await client.Bucket(self.bucket_name)
                 await bucket.objects.filter(Prefix=self.bucket_prefix).delete()
         except Exception as e:
