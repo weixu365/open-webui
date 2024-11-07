@@ -1,14 +1,13 @@
+from contextlib import asynccontextmanager
 import os
+from pathlib import Path
 import shutil
 
-
-from typing import AsyncGenerator, AsyncIterator, BinaryIO, Generator, Iterator, Tuple
+from typing import AsyncIterator, BinaryIO, Tuple
 
 from open_webui.constants import ERROR_MESSAGES
 from open_webui.config import UPLOAD_DIR
-from smart_open import open
-
-from open_webui.storage.base_storage_provider import LocalFile, StorageProvider
+from open_webui.storage.base_storage_provider import StorageProvider
 
 class LocalStorageProvider(StorageProvider):
     async def upload_file(self, file: BinaryIO, filename: str) -> Tuple[bytes, str]:
@@ -17,23 +16,25 @@ class LocalStorageProvider(StorageProvider):
         if not contents:
             raise ValueError(ERROR_MESSAGES.EMPTY_CONTENT)
 
-        file_path = f"{UPLOAD_DIR}/{filename}"
+        file_path = Path(UPLOAD_DIR) / filename
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
         with open(file_path, "wb") as f:
             f.write(contents)
-        return contents, file_path
+        return contents, file_path.as_posix()
 
     async def get_file(self, file_path: str) -> AsyncIterator[bytes]:
-        chunk_size = 8 * 1024
-        with open(file_path, 'rb') as file:
+        with open(file_path, "rb") as file:
             while True:
-                chunk = file.read(chunk_size)
+                chunk = file.read(self.STREAMING_CHUNK_SIZE)
                 if not chunk:
                     break
                 yield chunk
 
-    async def as_local_file(self, file_path: str) -> LocalFile:
-        return LocalFile(file_path)
-    
+    @asynccontextmanager
+    async def as_local_file(self, file_path: str) -> AsyncIterator[str]:
+        yield file_path
+
     async def delete_file(self, filename: str) -> None:
         """Deletes a file from the local file system."""
         file_path = f"{UPLOAD_DIR}/{filename}"

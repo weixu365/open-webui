@@ -829,16 +829,18 @@ async def process_file(
         else:
             # Process the file and save the content
             # Usage: /files/
+            assert file
+            assert file.meta
             file_path = file.path
             if file_path:
-                with await Storage.as_local_file(file_path) as local_file:
+                async with Storage.as_local_file(file_path) as local_file_path:
                     loader = Loader(
                         engine=app.state.config.CONTENT_EXTRACTION_ENGINE,
                         TIKA_SERVER_URL=app.state.config.TIKA_SERVER_URL,
                         PDF_EXTRACT_IMAGES=app.state.config.PDF_EXTRACT_IMAGES,
                     )
                     loaded_docs = loader.load(
-                        file.filename, file.meta.get("content_type"), local_file.get_local_path()
+                        file.filename, file.meta.get("content_type"), local_file_path
                     )
 
                     docs = [
@@ -853,6 +855,7 @@ async def process_file(
                         )
                         for doc in loaded_docs]
             else:
+                assert file.data
                 docs = [
                     Document(
                         page_content=file.data.get("content", ""),

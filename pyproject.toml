@@ -32,7 +32,8 @@ dependencies = [
 
     "pymongo",
     "redis",
-    "boto3==1.35.0",
+    "boto3==1.35.36",
+    "aioboto3==13.2.0",
 
     "argon2-cffi==23.1.0",
     "APScheduler==3.10.4",
@@ -143,3 +144,8 @@ exclude = [
     "chroma.sqlite3",
 ]
 force-include = { "CHANGELOG.md" = "open_webui/CHANGELOG.md", build = "open_webui/frontend" }
+
+[dependency-groups]
+dev = [
+    "types-aioboto3[s3]>=13.2.0.post1",
+]
